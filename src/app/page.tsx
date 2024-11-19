@@ -6,8 +6,18 @@ import { Search } from 'lucide-react'
 
 export default function Homepage() {
   const featuredGames = [
-    { id: 1, title: "Whack-a-me", image: "/placeholder.svg?height=200&width=300", slug: "whack-a-me" },
-    { id: 2, title: "Puzzle-a-Day", image: "/placeholder.svg?height=200&width=300", slug: "puzzle-a-day" },
+    { 
+      id: 1, 
+      title: "Whack-a-me", 
+      thumbnail: "/WAM-Carousel-1.jpg",
+      slug: "whack-a-me" 
+    },
+    { 
+      id: 2, 
+      title: "Puzzle-a-Day", 
+      thumbnail: "/placeholder.svg?height=200&width=300",
+      slug: "puzzle-a-day" 
+    },
   ]
 
   return (
@@ -41,7 +51,11 @@ export default function Homepage() {
                   <CardTitle>{game.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <img src={game.image} alt={game.title} className="w-full h-40 object-cover rounded-md mb-4" />
+                  <img 
+                    src={game.thumbnail} 
+                    alt={game.title}
+                    className="w-full h-auto rounded-md"
+                  />
                 </CardContent>
                 <CardFooter>
                   <Link href={`/games/${game.slug}`} className="w-full">

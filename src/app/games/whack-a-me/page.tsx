@@ -1,40 +1,92 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Camera, Upload } from 'lucide-react'
+import { CameraCapture } from '@/components/ui/cameraCapture'
+import Image from 'next/image'
 
 export default function WhackAMePage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [poem, setPoem] = useState<string>('')
+  const [happyPhotoUrl, setHappyPhotoUrl] = useState<string | null>(null)
+  const [sadPhotoUrl, setSadPhotoUrl] = useState<string | null>(null)
+  const [happyFaceAnalysis, setHappyFaceAnalysis] = useState<any>(null)
+  const [sadFaceAnalysis, setSadFaceAnalysis] = useState<any>(null)
   const [apologyReason, setApologyReason] = useState<string>('')
+  const [userId, setUserId] = useState<string>('')
+  const [orderId, setOrderId] = useState<string>('')
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0])
-    }
-  }
+  useEffect(() => {
+    setUserId(crypto.randomUUID())
+    setOrderId(crypto.randomUUID())
+  }, [])
 
-  const openCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
-      // If we successfully got camera access, close it and open the camera input
-      stream.getTracks().forEach(track => track.stop())
-      document.getElementById('camera-upload')?.click()
-    } catch (error) {
-      // If camera access fails, fall back to gallery upload
-      document.getElementById('gallery-upload')?.click()
-    }
-  }
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    console.log('Form submitted')
+    
+    // Get form data
+    const formData = new FormData(event.currentTarget)
+    const name = formData.get('input1') as string
+    const recipientName = formData.get('recipientName') as string
+    const endText = formData.get('endText') as string
+
+    // Create structured game data
+    const gameTextObj = {
+      introText: apologyReason,
+      endText: endText,
+      usedText: null // Add if you need to track used text
+    }
+
+    const userNamesObj = {
+      sender: name,
+      receiver: recipientName
+    }
+
+    const gameData = {
+      order_id: orderId,
+      user_id: userId,
+      faceCutout: {
+        happy: happyPhotoUrl || "",
+        frown: sadPhotoUrl || "",
+        facepoints: {
+          happy: happyFaceAnalysis?.faces || [],
+          frown: sadFaceAnalysis?.faces || []
+        }
+      },
+      userNames: {
+        sender: userNamesObj.sender || "",
+        receiver: userNamesObj.receiver || ""
+      },
+      gameText: {
+        introText: gameTextObj.introText || "",
+        endText: gameTextObj.endText || ""
+      },
+      tempateId: "",
+      assets: {
+        startBackground: "https://pinelime-orders.s3.amazonaws.com/personalised-games/backgrounds/start_background_new.png",
+        gameBackground: "https://pinelime-orders.s3.amazonaws.com/personalised-games/backgrounds/game_background_college.png",
+        finishBackground: "https://pinelime-orders.s3.amazonaws.com/personalised-games/backgrounds/finish_background_new.png",
+        whackItem: "https://pinelime-orders.s3.amazonaws.com/personalised-games/hammer/slipper.png"
+      },
+      senderPhone: "",
+      status: "PREVIEW",
+      gameURL: "",
+      gameType: "Whack-a-me"
+    }
+
+    try {
+      const response = await fetch('/api/create-whack-a-me-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(gameData),
+      })
+
+      if (!response.ok) throw new Error('Failed to create game')
+    } catch (error) {
+      console.error('Error creating game:', error)
+    }
   }
 
   const generatePoem = async () => {
@@ -47,7 +99,7 @@ export default function WhackAMePage() {
 
       if (!response.ok) throw new Error('Failed to generate poem')
       const data = await response.json()
-      setPoem(data.poem)
+      setApologyReason(data.poem)
     } catch (error) {
       console.error('Error generating poem:', error)
     }
@@ -58,60 +110,69 @@ export default function WhackAMePage() {
       <main className="container mx-auto px-4 py-8">
         <Card className="max-w-2xl mx-auto">
           <CardContent>
-            <img 
+            <Image 
               src="/WAM-Hero.webp"
               alt="Whack-a-me main preview" 
+              width={800}
+              height={320}
               className="w-full h-80 object-contain rounded-md mb-4"
             />
 
             <h2 className="text-2xl font-semibold mt-8 mb-4 text-primary text-center">
-              Customize your Whack-a-me game
+              Customize your game
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>Your Photo</Label>
-                <div className="flex gap-2">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={openCamera}
-                  >
-                    <Camera className="mr-2 h-4 w-4" />
-                    Take Photo
-                  </Button>
+                <CameraCapture 
+                  onPhotoCapture={(happyFile, sadFile, happyFaceAnalysis, sadFaceAnalysis) => {
+                    console.log('happyFile', happyFile)
+                    console.log('sadFile', sadFile)
+                    setHappyPhotoUrl(happyFile)
+                    setSadPhotoUrl(sadFile)
+                    console.log('happyFaceAnalysis', happyFaceAnalysis)
+                    console.log('sadFaceAnalysis', sadFaceAnalysis)
+                    setHappyFaceAnalysis(happyFaceAnalysis)
+                    setSadFaceAnalysis(sadFaceAnalysis)
+                  }}
+                  onError={() => console.error('Camera access error')}
+                />
+
+                <div className="flex gap-4">
+                  {happyPhotoUrl && (
+                    <div className="mt-4 relative flex-1">
+                      <Image 
+                        src={happyPhotoUrl} 
+                        alt="Selected" 
+                        width={200}
+                        height={200}
+                        className="h-[200px] w-full object-contain rounded-lg"
+                      />
+                    </div>
+                  )}
+                  {sadPhotoUrl && (
+                    <div className="mt-4 relative flex-1">
+                      <Image 
+                        src={sadPhotoUrl} 
+                        alt="Selected" 
+                        width={200}
+                        height={200}
+                        className="h-[200px] w-full object-contain rounded-lg"
+                      />
+                    </div>
+                  )}
                 </div>
-                <input
-                  id="camera-upload"
-                  type="file"
-                  accept="image/*"
-                  capture="user"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <input
-                  id="gallery-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                {selectedFile && (
-                  <p className="text-sm text-muted-foreground">
-                    Selected: {selectedFile.name}
-                  </p>
-                )}
               </div>
 
               <div>
                 <Label htmlFor="input1">Your name (This will be in the title of the game)</Label>
-                <Input id="input1" placeholder="Bae" required />
+                <Input id="input1" name="input1" placeholder="Bae" required />
               </div>
 
               <div>
                 <Label htmlFor="recipientName">Recipient name</Label>
-                <Input id="recipientName" placeholder="Pookie" required />
+                <Input id="recipientName" name="recipientName" placeholder="Pookie" required />
               </div>
 
               <div>
@@ -125,30 +186,22 @@ export default function WhackAMePage() {
                 />
               </div>
 
-              <Button 
-                type="button" 
-                onClick={generatePoem}
-                className="w-1/3 mx-auto"
-                disabled={!apologyReason}
-              >
-                Generate Poem
-              </Button>
-
-              <div>
-                <Label htmlFor="poem">Apology Poem</Label>
-                <Textarea 
-                  id="poem"
-                  value={poem}
-                  onChange={(e) => setPoem(e.target.value)}
-                  className="min-h-[150px]"
-                  required
-                />
+              <div className="flex items-center justify-between">
+                <p className="text-foreground pr-2 text-sm">We&apos;ll try and help make this better</p>
+                <Button 
+                  type="button" 
+                  onClick={generatePoem}
+                  disabled={!apologyReason}
+                >
+                  Generate Poem
+                </Button>
               </div>
 
               <div>
                 <Label htmlFor="endText">End Text</Label>
                 <Input 
                   id="endText" 
+                  name="endText"
                   placeholder="I'll be better!"
                   required 
                 />

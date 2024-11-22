@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: 'd1wxxs914x4wga.cloudfront.net',
         pathname: '/whack-a-me/processed-photos/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'd1tsukz865bhnw.cloudfront.net',
+        pathname: '/puzzle-a-day/**',
+      },
     ],
   },
 };

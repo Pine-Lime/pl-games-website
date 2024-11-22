@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { CameraCapture } from '@/components/ui/cameraCapture'
 import Image from 'next/image'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 export default function WhackAMePage() {
   const [happyPhotoUrl, setHappyPhotoUrl] = useState<string | null>(null)
@@ -108,6 +110,14 @@ export default function WhackAMePage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8">
+        <Link 
+          href="/"
+          className="inline-flex items-center mb-6 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Link>
+
         <Card className="max-w-2xl mx-auto">
           <CardContent>
             <Image 
@@ -115,10 +125,10 @@ export default function WhackAMePage() {
               alt="Whack-a-me main preview" 
               width={800}
               height={320}
-              className="w-full h-80 object-contain rounded-md mb-4"
+              className="w-full h-auto object-cover rounded-lg mt-6"
             />
 
-            <h2 className="text-2xl font-semibold mt-8 mb-4 text-primary text-center">
+            <h2 className="text-2xl font-semibold mt-8 mb-4 text-foreground text-center">
               Customize your game
             </h2>
 
@@ -138,31 +148,6 @@ export default function WhackAMePage() {
                   }}
                   onError={() => console.error('Camera access error')}
                 />
-
-                <div className="flex gap-4">
-                  {happyPhotoUrl && (
-                    <div className="mt-4 relative flex-1">
-                      <Image 
-                        src={happyPhotoUrl} 
-                        alt="Selected" 
-                        width={200}
-                        height={200}
-                        className="h-[200px] w-full object-contain rounded-lg"
-                      />
-                    </div>
-                  )}
-                  {sadPhotoUrl && (
-                    <div className="mt-4 relative flex-1">
-                      <Image 
-                        src={sadPhotoUrl} 
-                        alt="Selected" 
-                        width={200}
-                        height={200}
-                        className="h-[200px] w-full object-contain rounded-lg"
-                      />
-                    </div>
-                  )}
-                </div>
               </div>
 
               <div>
@@ -208,7 +193,7 @@ export default function WhackAMePage() {
               </div>
 
               <Button type="submit" className="w-full">
-                Create Game
+                Create!
               </Button>
             </form>
           </CardContent>

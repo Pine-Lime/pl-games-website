@@ -154,6 +154,12 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
             if ('cloudFront' in happyS3Result && 'cloudFront' in sadS3Result) {
               setProcessedHappyPhotoUrl(happyS3Result.cloudFront)
               setProcessedSadPhotoUrl(sadS3Result.cloudFront)
+              onPhotoCapture(
+                happyS3Result.cloudFront, 
+                sadS3Result.cloudFront, 
+                happyFaceAnalysis, 
+                sadFaceAnalysis
+              )
             }
           }
         } catch (error) {
@@ -162,7 +168,7 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
       }
     }
 
-    processPhotos()
+    processPhotos();
   }, [happyFacePhoto, sadFacePhoto])
 
   const handleConfirm = () => {
@@ -246,17 +252,23 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
       {!stream && (happyFacePhoto || sadFacePhoto) && (
         <div className="mt-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
+            <div className="relative w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
               {processedHappyPhotoUrl ? (
                 <img 
                   src={processedHappyPhotoUrl} 
                   alt="Processed happy face" 
-                  className="w-full rounded-lg"
-                  style={{ maxHeight: '200px', objectFit: 'contain' }}
+                  className="w-full h-full object-contain rounded-lg"
                 />
               ) : happyFacePhoto && (
-                <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                  Processing...
+                <div className="relative w-full h-full">
+                  <img
+                    src={happyFacePhoto}
+                    alt="Happy face being processed"
+                    className="w-full h-full object-contain rounded-lg opacity-50"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
                 </div>
               )}
               {happyFacePhoto && (
@@ -270,17 +282,23 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
                 </Button>
               )}
             </div>
-            <div className="relative">
+            <div className="relative w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
               {processedSadPhotoUrl ? (
                 <img 
                   src={processedSadPhotoUrl} 
                   alt="Processed sad face" 
-                  className="w-full rounded-lg"
-                  style={{ maxHeight: '200px', objectFit: 'contain' }}
+                  className="w-full h-full object-contain rounded-lg"
                 />
               ) : sadFacePhoto && (
-                <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                  Processing...
+                <div className="relative w-full h-full">
+                  <img
+                    src={sadFacePhoto}
+                    alt="Sad face being processed"
+                    className="w-full h-full object-contain rounded-lg opacity-50"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
                 </div>
               )}
               {sadFacePhoto && (
@@ -295,15 +313,6 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
               )}
             </div>
           </div>
-          {processedHappyPhotoUrl && processedSadPhotoUrl && (
-            <Button 
-              type="button"
-              className="mt-4 w-full"
-              onClick={handleConfirm}
-            >
-              Confirm
-            </Button>
-          )}
         </div>
       )}
     </>

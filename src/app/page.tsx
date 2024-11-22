@@ -9,60 +9,56 @@ export default function Homepage() {
     { 
       id: 1, 
       title: "Whack-a-me", 
-      thumbnail: "/WAM-Carousel-1.jpg",
+      thumbnail: "/WAM-Thumbnail.png",
       slug: "whack-a-me" 
     },
     { 
       id: 2, 
       title: "Puzzle-a-Day", 
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: "/PAD-Thumbnail.png",
       slug: "puzzle-a-day" 
     },
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-primary/30 via-background to-secondary/30">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-primary">
             PL Games
           </Link>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Input type="search" placeholder="Search games..." className="pl-10 pr-4 py-2" />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-            </div>
-          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <section className="mb-12">
+        <section className="mb-12 text-center relative">
+          <img 
+            src="/hero-image.jpg"
+            alt="PL Games Hero"
+            className="w-full h-[400px] object-cover rounded-lg mb-8"
+          />
           <h1 className="text-4xl font-bold mb-4">Welcome to PL Games!</h1>
           <p className="text-xl text-muted-foreground mb-6">Make your game and share it instantly!</p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-6">Games</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <h2 className="text-2xl font-semibold mb-6 text-center">Games</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-[1200px] mx-auto">
             {featuredGames.map((game) => (
-              <Card key={game.id}>
-                <CardHeader>
-                  <CardTitle>{game.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <img 
-                    src={game.thumbnail} 
-                    alt={game.title}
-                    className="w-full h-auto rounded-md"
-                  />
-                </CardContent>
-                <CardFooter>
-                  <Link href={`/games/${game.slug}`} className="w-full">
-                    <Button className="w-full">Customize Now</Button>
-                  </Link>
-                </CardFooter>
-              </Card>
+              <Link href={`/games/${game.slug}`} key={game.id} className="block">
+                <Card className="w-full hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-center">{game.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <img 
+                      src={game.thumbnail} 
+                      alt={game.title}
+                      className="w-[1000px] h-[500px] rounded-md object-cover"
+                    />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </section>

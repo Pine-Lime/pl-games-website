@@ -14,7 +14,7 @@ type CacheData<T> = {
 
 // Constants
 const REGION = process.env.NEXT_PUBLIC_AWS_REGION || 'ap-south-1';
-const DEFAULT_BUCKET = process.env.NEXT_PUBLIC_DEFAULT_S3_BUCKET || 'user-images-polaroid';
+const DEFAULT_BUCKET = process.env.NEXT_PUBLIC_DEFAULT_S3_BUCKET || 'pinelime-orders';
 
 // Initialize S3 client
 const s3 = new S3Client({

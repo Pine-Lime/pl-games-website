@@ -13,7 +13,7 @@ export async function POST(request: Request) {
         user_id: gameData.user_id,
         order_id: gameData.order_id,
         game_data: gameData,  // The entire request body goes into game_data column
-        game_type: "whack-a-me"
+        game_type: "puzzle-a-day"
       }])
       .select()
 

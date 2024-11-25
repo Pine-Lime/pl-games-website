@@ -54,6 +54,10 @@ export async function uploadToS3(
     ACL: 'public-read'
   };
 
+  if (!process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || !process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY) {
+    console.error('Missing required AWS credentials in environment variables');
+    return new Error('AWS credentials not configured');
+  }
   try {
     await s3.send(new PutObjectCommand({ ...params, ACL: 'public-read' }));
     return {

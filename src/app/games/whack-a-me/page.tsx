@@ -11,6 +11,13 @@ import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 interface FaceAnalysis {
   face_num: number;
@@ -144,6 +151,24 @@ export default function WhackAMePage() {
               height={320}
               className="w-full h-auto object-cover rounded-lg mt-6"
             />
+
+            <Carousel className="mt-6">
+              <CarouselContent>
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <CarouselItem key={num} className="basis-1/3">
+                    <Image
+                      src={`/WAM-Carousel-${num}.jpg`}
+                      alt={`Whack-a-me preview ${num}`}
+                      width={300}
+                      height={200}
+                      className="w-[100px] h-[200px] object-cover rounded-lg"
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
 
             <h2 className="text-2xl font-semibold mt-8 mb-4 text-foreground text-center">
               Customize your game

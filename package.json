@@ -16,7 +16,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "embla-carousel-react": "^8.4.0",
+    "embla-carousel-react": "^8.5.1",
     "lucide-react": "^0.460.0",
     "next": "15.0.3",
     "openai": "^4.72.0",

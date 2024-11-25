@@ -19,8 +19,6 @@ type CarouselProps = {
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
   setApi?: (api: CarouselApi) => void
-  images: string[]
-  title: string
 }
 
 type CarouselContextProps = {
@@ -30,8 +28,6 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-  images: string[]
-  title: string
 } & CarouselProps
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
@@ -57,8 +53,7 @@ const Carousel = React.forwardRef<
       setApi,
       plugins,
       className,
-      images,
-      title,
+      children,
       ...props
     },
     ref
@@ -137,8 +132,6 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
-          images,
-          title,
         }}
       >
         <div
@@ -149,19 +142,7 @@ const Carousel = React.forwardRef<
           aria-roledescription="carousel"
           {...props}
         >
-          <CarouselContent>
-            {images.map((image, index) => (
-              <CarouselItem key={index}>
-                <img 
-                  src={image} 
-                  alt={`${title} - image ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          {children}
         </div>
       </CarouselContext.Provider>
     )

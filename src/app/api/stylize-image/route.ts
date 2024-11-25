@@ -14,6 +14,9 @@ export async function POST(request: Request) {
     if (USE_TEST_IMAGE) {
       outputImageUrl = TEST_IMAGE_URL
     } else {
+      if (!process.env.REPLICATE_API_KEY) {
+        throw new Error('Missing Replicate API key - please add REPLICATE_API_KEY to your environment variables')
+      }
       const replicate = new Replicate({
         auth: process.env.REPLICATE_API_KEY,
       })

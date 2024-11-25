@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import Replicate from "replicate"
-import sharp from 'sharp'
 
 export async function POST(request: Request) {
   try {
@@ -33,39 +32,4 @@ export async function POST(request: Request) {
     console.error('Error in stylize-image:', error)
     return NextResponse.json({ error: 'Failed to process image' }, { status: 500 })
   }
-}
-
-export async function getImageDimensionFromURL(imageUrl: string) {
-    try {
-        const response = await fetch(imageUrl);
-        if (!response.ok) {
-            throw new Error('Failed to fetch image');
-        }
-
-        const buffer = await response.arrayBuffer();  // Get image buffer
-
-        // Using sharp to get image metadata including orientation
-        const metadata = await sharp(Buffer.from(buffer)).metadata();
-
-        let height = metadata.height;
-        let width = metadata.width;
-
-        // Adjust dimensions based on orientation
-        switch (metadata.orientation) {
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-                [height, width] = [width, height];
-                break;
-            default:
-                break;
-        }
-
-        return [height, width];
-
-    } catch (error) {
-        console.error('Failed to get image dimensions:', error);
-        return null;
-    }
 }

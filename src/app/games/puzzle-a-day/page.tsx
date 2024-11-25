@@ -12,13 +12,21 @@ import Link from 'next/link'
 import './styles.css'
 import { uploadToS3 } from '@/lib/upload'
 
+// Define an interface for the crop area
+interface CropArea {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export default function PuzzleADayPage() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [userId, setUserId] = useState<string>('')
   const [orderId, setOrderId] = useState<string>('')
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null)
   const [croppedImage, setCroppedImage] = useState<string | null>(null)
   const [isCropConfirmed, setIsCropConfirmed] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -37,7 +45,7 @@ export default function PuzzleADayPage() {
       image.src = url
     })
 
-  const getCroppedImg = async (imageSrc: string, pixelCrop: any) => {
+  const getCroppedImg = async (imageSrc: string, pixelCrop: CropArea) => {
     const image = await createImage(imageSrc)
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
@@ -68,7 +76,7 @@ export default function PuzzleADayPage() {
     })
   }
 
-  const onCropComplete = async (croppedArea: any, croppedAreaPixels: any) => {
+  const onCropComplete = async (croppedArea: CropArea, croppedAreaPixels: CropArea) => {
     setCroppedAreaPixels(croppedAreaPixels)
   }
 
@@ -124,15 +132,6 @@ export default function PuzzleADayPage() {
         }
       }
     }
-  }
-
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve((reader.result as string).split(',')[1])
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {

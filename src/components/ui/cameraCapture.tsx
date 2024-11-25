@@ -5,9 +5,23 @@ import { Button } from "@/components/ui/button"
 import { Camera, Repeat2 } from 'lucide-react'
 import { uploadToS3 } from '@/lib/upload'
 
+// Define interfaces for face analysis
+interface FaceAnalysis {
+  // Add specific properties based on what your API returns
+  // This is an example - adjust according to your actual data structure
+  faceId?: string;
+  confidence?: number;
+  // ... other properties
+}
+
 interface CameraCaptureProps {
-  onPhotoCapture: (happyPhoto: string, sadPhoto: string, happyFaceAnalysis: any, sadFaceAnalysis: any) => void
-  onError?: () => void
+  onPhotoCapture: (
+    happyPhoto: string, 
+    sadPhoto: string, 
+    happyFaceAnalysis: FaceAnalysis | null, 
+    sadFaceAnalysis: FaceAnalysis | null
+  ) => void;
+  onError?: () => void;
 }
 
 export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
@@ -20,8 +34,6 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
   const [processedHappyPhotoUrl, setProcessedHappyPhotoUrl] = useState<string | null>(null)
   const [processedSadPhotoUrl, setProcessedSadPhotoUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [happyFaceAnalysis, setHappyFaceAnalysis] = useState<any>(null)
-  const [sadFaceAnalysis, setSadFaceAnalysis] = useState<any>(null)
 
   const openCamera = async () => {
     try {
@@ -133,9 +145,10 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
           if (happyResult.success && sadResult.success) {
             const dateNow = Date.now()
             
-            setHappyFaceAnalysis(happyResult.faceAnalysis)
-            setSadFaceAnalysis(sadResult.faceAnalysis)
-            
+            // Store face analysis in local variables first
+            const happyAnalysis = happyResult.faceAnalysis
+            const sadAnalysis = sadResult.faceAnalysis
+
             const [happyS3Result, sadS3Result] = await Promise.all([
               uploadToS3(
                 Buffer.from(happyResult.imageData, 'base64'),
@@ -155,10 +168,10 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
               setProcessedHappyPhotoUrl(happyS3Result.cloudFront)
               setProcessedSadPhotoUrl(sadS3Result.cloudFront)
               onPhotoCapture(
-                happyS3Result.cloudFront, 
-                sadS3Result.cloudFront, 
-                happyFaceAnalysis, 
-                sadFaceAnalysis
+                happyS3Result.cloudFront,
+                sadS3Result.cloudFront,
+                happyAnalysis, // Use local variables instead of state
+                sadAnalysis
               )
             }
           }
@@ -171,24 +184,23 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
     processPhotos();
   }, [happyFacePhoto, sadFacePhoto])
 
-  const handleConfirm = () => {
-    if (processedHappyPhotoUrl && processedSadPhotoUrl) {
-      Promise.all([
-        fetch(processedHappyPhotoUrl),
-        fetch(processedSadPhotoUrl)
-      ]).then(() => {
-        setHappyFacePhoto(null)
-        setSadFacePhoto(null)
-        onPhotoCapture(
-          processedHappyPhotoUrl, 
-          processedSadPhotoUrl, 
-          happyFaceAnalysis, 
-          sadFaceAnalysis
-        )
-      })
-    }
-  }
-
+//   const handleConfirm = () => {
+//     if (processedHappyPhotoUrl && processedSadPhotoUrl) {
+//       Promise.all([
+//         fetch(processedHappyPhotoUrl),
+//         fetch(processedSadPhotoUrl)
+//       ]).then(() => {
+//         setHappyFacePhoto(null)
+//         setSadFacePhoto(null)
+//         onPhotoCapture(
+//           processedHappyPhotoUrl, 
+//           processedSadPhotoUrl, 
+//           happyFaceAnalysis, 
+//           sadFaceAnalysis
+//         )
+//       })
+//     }
+//   }
   const handleRetake = (type: 'happy' | 'sad') => {
     if (type === 'happy') {
       setHappyFacePhoto(null)

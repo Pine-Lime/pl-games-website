@@ -10,15 +10,25 @@ import { CameraCapture } from '@/components/ui/cameraCapture'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+
+interface FaceAnalysis {
+  face_num: number;
+  faces: number[][];
+  point: [number, number][][];
+}
 
 export default function WhackAMePage() {
   const [happyPhotoUrl, setHappyPhotoUrl] = useState<string | null>(null)
   const [sadPhotoUrl, setSadPhotoUrl] = useState<string | null>(null)
-  const [happyFaceAnalysis, setHappyFaceAnalysis] = useState<any>(null)
-  const [sadFaceAnalysis, setSadFaceAnalysis] = useState<any>(null)
+  const [happyFaceAnalysis, setHappyFaceAnalysis] = useState<FaceAnalysis | null>(null)
+  const [sadFaceAnalysis, setSadFaceAnalysis] = useState<FaceAnalysis | null>(null)
   const [apologyReason, setApologyReason] = useState<string>('')
   const [userId, setUserId] = useState<string>('')
   const [orderId, setOrderId] = useState<string>('')
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [gameOrderId, setGameOrderId] = useState<string | null>(null)
 
   useEffect(() => {
     setUserId(crypto.randomUUID())
@@ -27,6 +37,7 @@ export default function WhackAMePage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setIsLoading(true)
     
     // Get form data
     const formData = new FormData(event.currentTarget)
@@ -86,8 +97,14 @@ export default function WhackAMePage() {
       })
 
       if (!response.ok) throw new Error('Failed to create game')
+      
+      const result = await response.json()
+      setGameOrderId(result.order_id)
+      setIsSuccessDialogOpen(true)
     } catch (error) {
       console.error('Error creating game:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -143,8 +160,8 @@ export default function WhackAMePage() {
                     setSadPhotoUrl(sadFile)
                     console.log('happyFaceAnalysis', happyFaceAnalysis)
                     console.log('sadFaceAnalysis', sadFaceAnalysis)
-                    setHappyFaceAnalysis(happyFaceAnalysis)
-                    setSadFaceAnalysis(sadFaceAnalysis)
+                    setHappyFaceAnalysis(happyFaceAnalysis as FaceAnalysis)
+                    setSadFaceAnalysis(sadFaceAnalysis as FaceAnalysis)
                   }}
                   onError={() => console.error('Camera access error')}
                 />
@@ -192,13 +209,33 @@ export default function WhackAMePage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Create!
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Create!"}
               </Button>
             </form>
           </CardContent>
         </Card>
       </main>
+
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Game Created Successfully! 🎉</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Your game has been created successfully.</p>
+            <Button
+              asChild
+              className="mt-2 w-full"
+              variant="outline"
+            >
+              <Link href={`https://games.pinenli.me/?order_id=${gameOrderId}`}>
+                Try Now
+              </Link>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

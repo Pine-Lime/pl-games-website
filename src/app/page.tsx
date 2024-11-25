@@ -1,8 +1,6 @@
 import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Search } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Image from 'next/image'
 
 export default function Homepage() {
   const featuredGames = [
@@ -32,9 +30,11 @@ export default function Homepage() {
 
       <main className="container mx-auto px-4 py-8">
         <section className="mb-12 text-center relative">
-          <img 
+          <Image 
             src="/hero-image.jpg"
             alt="PL Games Hero"
+            width={1920}
+            height={400}
             className="w-full h-[400px] object-cover rounded-lg mb-8"
           />
           <h1 className="text-4xl font-bold mb-4">Welcome to PL Games!</h1>
@@ -51,9 +51,11 @@ export default function Homepage() {
                     <CardTitle className="text-2xl text-center">{game.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <img 
+                    <Image 
                       src={game.thumbnail} 
                       alt={game.title}
+                      width={1000}
+                      height={500}
                       className="w-[1000px] h-[500px] rounded-md object-cover"
                     />
                   </CardContent>

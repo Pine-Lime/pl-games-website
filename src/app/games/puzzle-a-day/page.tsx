@@ -89,6 +89,7 @@ export default function PuzzleADayPage() {
         setIsProcessing(true)
 
         try {
+          // Upload original image to S3
           const response = await fetch(croppedImage)
           const blob = await response.blob()
           const buffer = Buffer.from(await blob.arrayBuffer())
@@ -102,6 +103,7 @@ export default function PuzzleADayPage() {
 
           if (uploadResult instanceof Error) throw uploadResult
 
+          // Start the stylization process
           const stylizeResponse = await fetch('/api/stylize-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -110,21 +112,36 @@ export default function PuzzleADayPage() {
             })
           })
 
-          if (!stylizeResponse.ok) throw new Error('Failed to stylize image')
+          if (!stylizeResponse.ok) throw new Error('Failed to start stylization')
+          
+          const { predictionId, status } = await stylizeResponse.json()
+          
+          // Poll for completion
+          while (status !== 'complete') {
+            await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second between checks
+            
+            const checkResponse = await fetch(`/api/check-completion?predictionId=${predictionId}`)
+            if (!checkResponse.ok) throw new Error('Failed to check status')
+            
+            const result = await checkResponse.json()
+            if (result.status === 'complete') {
+              // Upload the stylized image to S3
+              const stylizedResponse = await fetch(result.url)
+              const stylizedBlob = await stylizedResponse.blob()
+              const stylizedBuffer = Buffer.from(await stylizedBlob.arrayBuffer())
 
-          const stylizedBlob = await stylizeResponse.blob()
-          const stylizedBuffer = Buffer.from(await stylizedBlob.arrayBuffer())
+              const stylizedUploadResult = await uploadToS3(
+                stylizedBuffer,
+                'image/webp',
+                'stylized.webp',
+                `puzzle-a-day/${orderId}`
+              )
 
-          const stylizedUploadResult = await uploadToS3(
-            stylizedBuffer,
-            'image/webp',
-            'stylized.webp',
-            `puzzle-a-day/${orderId}`
-          )
-
-          if (stylizedUploadResult instanceof Error) throw stylizedUploadResult
-
-          setCroppedImage(stylizedUploadResult.cloudFront)
+              if (stylizedUploadResult instanceof Error) throw stylizedUploadResult
+              setCroppedImage(stylizedUploadResult.cloudFront)
+              break
+            }
+          }
         } catch (error) {
           console.error('Error processing image:', error)
         } finally {

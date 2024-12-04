@@ -115,7 +115,7 @@ export default function DailyChallengePage() {
           <div className="py-4">
             <p>You have successfully registered for the daily challenge.</p>
             <p className="mt-2 text-sm text-muted-foreground">
-              We'll send you notifications when new challenges are available.
+              We will send you notifications when new challenges are available.
             </p>
           </div>
         </DialogContent>

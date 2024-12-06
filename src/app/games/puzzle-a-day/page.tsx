@@ -31,6 +31,8 @@ export default function PuzzleADayPage() {
   const [isCropConfirmed, setIsCropConfirmed] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null)
+  const [stylizedImageUrl, setStylizedImageUrl] = useState<string | null>(null)
 
   useEffect(() => {
     setUserId(crypto.randomUUID())
@@ -102,6 +104,7 @@ export default function PuzzleADayPage() {
           )
 
           if (uploadResult instanceof Error) throw uploadResult
+          setOriginalImageUrl(uploadResult.objectURL)
 
           // Start the stylization process
           const stylizeResponse = await fetch('/api/stylize-image', {
@@ -138,7 +141,8 @@ export default function PuzzleADayPage() {
               )
 
               if (stylizedUploadResult instanceof Error) throw stylizedUploadResult
-              setCroppedImage(stylizedUploadResult.cloudFront)
+              setStylizedImageUrl(stylizedUploadResult.objectURL)
+              setCroppedImage(stylizedUploadResult.objectURL)
               break
             }
           }
@@ -185,14 +189,20 @@ export default function PuzzleADayPage() {
     const formData = new FormData(event.currentTarget)
     
     const gameData = {
-      order_id: orderId,
-      user_id: userId,
-      userImage: croppedImage || selectedFile || "",
-      userName: formData.get('name') as string,
+      assets: {
+        original: originalImageUrl || "",
+        filtered: stylizedImageUrl || "",
+      },
+      userNames: {
+        sender: formData.get('name') as string,
+        recipient: "",
+      },
       gameText: {
         endText: formData.get('endText') as string
       },
-      status: "PREVIEW",
+      order_id: orderId,
+      user_id: userId,
+      status: "PREVIEW", 
       gameURL: "",
       gameType: "Puzzle-a-Day"
     }

@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 export default function DailyChallengePage() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false)
 
@@ -26,7 +27,7 @@ export default function DailyChallengePage() {
       const response = await fetch('/api/register-for-daily-challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, phone }),
+        body: JSON.stringify({ email, phone, address }),
       })
 
       if (!response.ok) throw new Error('Failed to register')
@@ -54,7 +55,7 @@ export default function DailyChallengePage() {
           <CardContent className="p-8">
             <div className="relative h-60 sm:h-80 mb-8 rounded-lg overflow-hidden">
               <Image 
-                src="/PAD-Hero.webp"
+                src="/PAD-AdventOfPuzzles-Hero.png"
                 alt="Daily Challenge Preview" 
                 width={800}
                 height={320}
@@ -92,6 +93,19 @@ export default function DailyChallengePage() {
                   onChange={(e) => setPhone(e.target.value)}
                   className="bg-secondary"
                   placeholder="+1 (555) 555-5555"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-lg">Address</Label>
+                <p className="text-sm text-muted-foreground mb-2">Optional. We will ship you a little gift if you complete the challenge!</p>
+                <Input 
+                  id="address" 
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="bg-secondary"
+                  placeholder="123 Main St, City, Country"
                 />
               </div>
 

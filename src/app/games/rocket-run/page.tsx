@@ -84,7 +84,7 @@ export default function RocketRunPage() {
           if (result.length) {
             setReceiver(true);
             setOrderId(urlOrderId);
-            setSenderGameData(result[0]);
+            setSenderGameData(result[0].game_data);
           }
         });
       } catch (error) {

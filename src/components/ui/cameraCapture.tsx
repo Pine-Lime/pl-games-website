@@ -165,11 +165,11 @@ export function CameraCapture({ onPhotoCapture, onError }: CameraCaptureProps) {
             ])
 
             if ('cloudFront' in happyS3Result && 'cloudFront' in sadS3Result) {
-              setProcessedHappyPhotoUrl(happyS3Result.cloudFront)
-              setProcessedSadPhotoUrl(sadS3Result.cloudFront)
+              setProcessedHappyPhotoUrl(happyS3Result.objectURL)
+              setProcessedSadPhotoUrl(sadS3Result.objectURL)
               onPhotoCapture(
-                happyS3Result.cloudFront,
-                sadS3Result.cloudFront,
+                happyS3Result.objectURL,
+                sadS3Result.objectURL,
                 happyAnalysis, // Use local variables instead of state
                 sadAnalysis
               )

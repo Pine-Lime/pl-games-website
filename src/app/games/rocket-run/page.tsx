@@ -17,6 +17,43 @@ interface FaceAnalysis {
   point: [number, number][][];
 }
 
+interface FaceCutout {
+  happy: string;
+  frown: string;
+  facepoints: {
+    happy: number[][];
+    frown: number[][];
+  };
+}
+
+interface Replay {
+  height: number;
+  action: number;
+}
+
+interface Player {
+  highScore: number;
+  name: string;
+  email: string;
+  replay: Replay[];
+  faceCutout: FaceCutout;
+  sender: boolean;
+  userId: string;
+}
+
+interface GameData {
+  order_id: string;
+  user_id: string;
+  players: Player[];
+  dueDate: string;
+  groupName: string;
+  senderEmail: string;
+  finalImage: string;
+  status: string;
+  gameURL: string;
+  gameType: string;
+}
+
 export default function RocketRunPage() {
   const [happyPhotoUrl, setHappyPhotoUrl] = useState<string | null>(null);
   const [sadPhotoUrl, setSadPhotoUrl] = useState<string | null>(null);
@@ -28,7 +65,7 @@ export default function RocketRunPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [gameOrderId, setGameOrderId] = useState<string | null>(null);
   const [isReceiver, setReceiver] = useState(false);
-  const [senderGameData, setSenderGameData] = useState([]);
+  const [senderGameData, setSenderGameData] = useState<GameData | null>(null);
 
   useEffect(() => {
     setUserId(crypto.randomUUID());
@@ -47,7 +84,7 @@ export default function RocketRunPage() {
           if (result.length) {
             setReceiver(true);
             setOrderId(urlOrderId);
-            setSenderGameData(result[0].game_data);
+            setSenderGameData(result[0]);
           }
         });
       } catch (error) {
@@ -72,7 +109,7 @@ export default function RocketRunPage() {
       highScore: 0,
       name: name,
       email: email,
-      replay: {},
+      replay: [],
       faceCutout: {
         happy: happyPhotoUrl || "",
         frown: sadPhotoUrl || "",
@@ -85,17 +122,14 @@ export default function RocketRunPage() {
       userId: userId,
     }
 
-    if(isReceiver){
-      
+    if(isReceiver && senderGameData){
       try {
-        const t = senderGameData
-        console.log(">>before", typeof t, t, _playersData);
-        t.players.push(_playersData)
-        console.log(">>after", t, _playersData)
+        const updatedGameData = {...senderGameData};
+        updatedGameData.players.push(_playersData);
         
         const gameData = {
           order_id: orderId,
-          game_data: t
+          game_data: updatedGameData
         };
         const response = await fetch("/api/update-rocket-run-game", {
           method: "POST",
@@ -157,7 +191,13 @@ export default function RocketRunPage() {
         <Card className="max-w-2xl mx-auto">
           <CardContent>
             <Image src="/RR-Hero.webp" alt="Whack-a-me main preview" width={800} height={320} className="w-full h-auto object-cover rounded-lg mt-6" />
-            <h2 className="text-2xl font-semibold mt-8 mb-4 text-foreground text-center">Customize your game {isReceiver && senderGameData.players? "(Joining " + senderGameData.players.filter(item => item.sender)[0].name + " in " + senderGameData.groupName + ")" : ""}</h2>
+            <h2 className="text-2xl font-semibold mt-8 mb-4 text-foreground text-center">
+              Customize your game {
+                isReceiver && senderGameData?.players ? 
+                `(Joining ${senderGameData.players.find(item => item.sender)?.name} in ${senderGameData.groupName})` : 
+                ""
+              }
+            </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">

@@ -20,7 +20,7 @@ export default function DailyChallengePage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     
-    if (!email && !phone) return // Ensure at least one field is filled
+    if (!email) return // Only check for email
     
     setIsSubmitting(true)
     try {
@@ -31,10 +31,9 @@ export default function DailyChallengePage() {
       })
 
       if (!response.ok) throw new Error('Failed to register')
-      setIsSuccessDialogOpen(true) // Show success dialog
+      setIsSuccessDialogOpen(true)
     } catch (error) {
       console.error('Error registering:', error)
-      // Handle error (could add an error message state here)
     } finally {
       setIsSubmitting(false)
     }
@@ -112,7 +111,7 @@ export default function DailyChallengePage() {
               <Button 
                 type="submit" 
                 className="w-full bg-primary hover:bg-primary/90 text-lg py-6 button-effect"
-                disabled={isSubmitting || (!email && !phone)}
+                disabled={isSubmitting || !email}
               >
                 {isSubmitting ? 'Registering...' : 'Register'}
               </Button>

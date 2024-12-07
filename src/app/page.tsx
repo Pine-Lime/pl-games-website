@@ -16,6 +16,12 @@ export default function Homepage() {
       thumbnail: "/PAD-Thumbnail.png",
       slug: "puzzle-a-day" 
     },
+    { 
+      id: 3, 
+      title: "Rocket Run", 
+      thumbnail: "/RR-Hero.webp",
+      slug: "rocket-run" 
+    }
   ]
 
   return (

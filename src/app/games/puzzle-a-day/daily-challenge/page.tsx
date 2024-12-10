@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useRouter } from 'next/navigation'
 
 export default function DailyChallengePage() {
   const [email, setEmail] = useState('')
@@ -16,6 +17,7 @@ export default function DailyChallengePage() {
   const [address, setAddress] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -130,6 +132,12 @@ export default function DailyChallengePage() {
             <p className="mt-2 text-sm text-muted-foreground">
               We will send you notifications when new challenges are available.
             </p>
+            <Button 
+              className="w-full mt-4"
+              onClick={() => router.push(`https://puzzleaday.pinenli.me/advent-of-puzzles?email=${encodeURIComponent(email)}`)}
+            >
+              Go to Dashboard
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -252,7 +252,7 @@ export default function RocketRunPage() {
           <div className="py-4">
             <p>Your game has been created successfully.</p>
             <Button asChild className="mt-2 w-full" variant="outline">
-              <Link href={`https://games.pinenli.me/?order_id=${gameOrderId}`}>Try Now</Link>
+              <Link href={`https://diwali.pinenli.me/?order_id=${gameOrderId}`}>Try Now</Link>
             </Button>
           </div>
         </DialogContent>

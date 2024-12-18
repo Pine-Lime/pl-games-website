@@ -37,7 +37,7 @@ export default function Homepage() {
       <main className="container mx-auto px-4 py-8">
         <section className="mb-12 text-center relative">
           <Image 
-            src="/hero-image.jpg"
+            src="/hero-image.png"
             alt="PL Games Hero"
             width={1920}
             height={400}

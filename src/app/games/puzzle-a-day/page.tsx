@@ -11,6 +11,7 @@ import { Camera, Upload, ZoomIn, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import './styles.css'
 import { uploadToS3 } from '@/lib/upload'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Define an interface for the crop area
 interface CropArea {
@@ -24,6 +25,7 @@ export default function PuzzleADayPage() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [userId, setUserId] = useState<string>('')
   const [orderId, setOrderId] = useState<string>('')
+  const [gameOrderId, setGameOrderId] = useState<string | null>(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null)
@@ -33,6 +35,8 @@ export default function PuzzleADayPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null)
   const [stylizedImageUrl, setStylizedImageUrl] = useState<string | null>(null)
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     setUserId(crypto.randomUUID())
@@ -186,28 +190,30 @@ export default function PuzzleADayPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    
-    const gameData = {
-      assets: {
-        original: originalImageUrl || "",
-        filtered: stylizedImageUrl || "",
-      },
-      userNames: {
-        sender: formData.get('name') as string,
-        recipient: "",
-      },
-      gameText: {
-        endText: formData.get('endText') as string
-      },
-      order_id: orderId,
-      user_id: userId,
-      status: "PREVIEW", 
-      gameURL: "",
-      gameType: "Puzzle-a-Day"
-    }
+    setIsSubmitting(true)
 
     try {
+      const formData = new FormData(event.currentTarget)
+      
+      const gameData = {
+        assets: {
+          original: originalImageUrl || "",
+          filtered: stylizedImageUrl || "",
+        },
+        userNames: {
+          sender: formData.get('name') as string,
+          recipient: "",
+        },
+        gameText: {
+          endText: formData.get('endText') as string
+        },
+        order_id: orderId,
+        user_id: userId,
+        status: "PREVIEW", 
+        gameURL: "",
+        gameType: "Puzzle-a-Day"
+      }
+
       const response = await fetch('/api/create-puzzle-a-day-game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -215,8 +221,17 @@ export default function PuzzleADayPage() {
       })
 
       if (!response.ok) throw new Error('Failed to create game')
+      
+      const result = await response.json()
+      await new Promise<void>((resolve) => {
+        setGameOrderId(result[0].order_id)
+        resolve()
+      })
+      setIsSuccessDialogOpen(true)
     } catch (error) {
       console.error('Error creating game:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -337,7 +352,7 @@ export default function PuzzleADayPage() {
                             onClick={handleConfirmCrop}
                             className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
                           >
-                            Crop
+                            Confirm
                           </Button>
                         </div>
                       </div>
@@ -361,6 +376,11 @@ export default function PuzzleADayPage() {
                         </div>
                       )}
                     </div>
+                    {isProcessing && (
+                      <p className="text-sm text-muted-foreground text-center mt-3">
+                        Generating preview. This may take a minute or two...
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -368,13 +388,34 @@ export default function PuzzleADayPage() {
               <Button 
                 type="submit" 
                 className="w-full bg-primary hover:bg-primary/90 text-lg py-6 button-effect"
+                disabled={isSubmitting}
               >
-                Create!
+                {isSubmitting ? 'Creating...' : 'Create!'}
               </Button>
             </form>
           </CardContent>
         </Card>
       </main>
+      
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Game Created Successfully! 🎉</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Your game has been created successfully.</p>
+            <Button
+              asChild
+              className="mt-2 w-full"
+              variant="outline"
+            >
+              <Link href={`https://puzzleaday.pinenli.me/?order_id=${gameOrderId}`}>
+                Try Now
+              </Link>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
